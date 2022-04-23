@@ -6,14 +6,19 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.MediaMetadata
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.nurshuvo.shuvotestapplication.services.NotificationActionService
+import com.nurshuvo.shuvotestapplication.viewmodel.SharedViewModel
 
-class CreateNotification {
+
+class CreateNotification() {
     companion object {
         public val CHANNEL_ID = "StubeMusicChannel1"
 
@@ -24,20 +29,40 @@ class CreateNotification {
 
     private lateinit var notification: Notification
 
-    fun createNotification(activity: Activity, track: Track, playButton: Int, pos: Int, size: Int) {
+    fun createNotification(activity: Activity, track: Track, playButton: Int, pos: Int, size: Int,
+    vm: SharedViewModel, state: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notiManagerCompat = NotificationManagerCompat.from(activity)
             val mediaSessionCompat = MediaSessionCompat(activity, "tag")
 
             val mp = (activity.application as STubeApplication).appContainer.mediaPlayer
 
+            val mmr = MediaMetadataRetriever()
+            mmr.setDataSource(track.filePath)
+            val duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
+            mmr.release()
+
             // Needed to set for android 11.
             mediaSessionCompat.setMetadata(
                 MediaMetadataCompat.Builder()
                     .putString(MediaMetadata.METADATA_KEY_TITLE, track.title)
                     .putString(MediaMetadata.METADATA_KEY_ARTIST, track.artist)
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
                     .build()
             )
+
+            //TODO Pause in notification is not working properly
+            val mPlaybackState = PlaybackStateCompat.Builder()
+                .setState(state, vm.songPosition.toLong(), 1.0f)
+                .setActions(
+                    PlaybackStateCompat.ACTION_PLAY or
+                            PlaybackStateCompat.ACTION_PAUSE or
+                            PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                            PlaybackStateCompat.ACTION_SEEK_TO
+                )
+                .build()
+            mediaSessionCompat.setPlaybackState(mPlaybackState)
 
             val bitmapIcon = BitmapFactory.decodeResource(activity.resources, track.image)
 

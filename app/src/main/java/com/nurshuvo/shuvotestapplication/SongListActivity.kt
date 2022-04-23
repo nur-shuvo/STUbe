@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView.OnItemClickListener
@@ -95,7 +96,9 @@ class SongListActivity : AppCompatActivity() {
                         vm.allTracks?.get(vm.songPosition)!!,
                         R.drawable.play_icon_playing,
                         vm.songPosition,
-                        (allPaths.size - 1)
+                        (allPaths.size - 1),
+                        vm,
+                        PlaybackStateCompat.STATE_PLAYING
                     )
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
@@ -165,7 +168,9 @@ class SongListActivity : AppCompatActivity() {
                 vm.allTracks?.get(vm.songPosition)!!,
                 R.drawable.play_icon_playing,
                 vm.songPosition,
-                (allPaths.size - 1)
+                (allPaths.size - 1),
+                vm,
+                PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
             )
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
@@ -192,7 +197,9 @@ class SongListActivity : AppCompatActivity() {
                 vm.allTracks?.get(vm.songPosition)!!,
                 R.drawable.play_icon_playing,
                 vm.songPosition,
-                (allPaths.size - 1)
+                (allPaths.size - 1),
+                vm,
+                PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS
             )
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
@@ -212,7 +219,9 @@ class SongListActivity : AppCompatActivity() {
                 vm.allTracks?.get(vm.songPosition)!!,
                 R.drawable.play_icon_playing,
                 vm.songPosition,
-                (allPaths.size - 1)
+                (allPaths.size - 1),
+                vm,
+                PlaybackStateCompat.STATE_PLAYING
             )
 
         } else if (vm.paused.value == 1) {
@@ -224,7 +233,9 @@ class SongListActivity : AppCompatActivity() {
                 vm.allTracks?.get(vm.songPosition)!!,
                 R.drawable.play_icon_stopped,
                 vm.songPosition,
-                (allPaths.size - 1)
+                (allPaths.size - 1),
+                vm,
+                PlaybackStateCompat.STATE_PAUSED
             )
         }
     }
