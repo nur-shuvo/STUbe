@@ -1,10 +1,16 @@
 package com.nurshuvo.shuvotestapplication
 
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import java.io.File
 
 
@@ -13,9 +19,42 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if ((SDK_INT >= Build.VERSION_CODES.R) && !checkPermission()) {
+            requestPermission()
+        } else {
+            doMainTask()
+        }
+
         supportActionBar?.hide()
         setContentView(R.layout.new_layout)
+    }
 
+    private fun checkPermission(): Boolean {
+        val result =
+            ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE)
+        return result == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestPermission() {
+        if (SDK_INT >= Build.VERSION_CODES.R) {
+            ActivityCompat.requestPermissions(this, arrayOf(READ_EXTERNAL_STORAGE), 101)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 101) {
+            if (checkPermission()) {
+                doMainTask()
+            }
+        }
+    }
+
+    private fun doMainTask() {
         val songList = getPlayList(Environment.getExternalStorageDirectory().path)
         val allSongs = ArrayList<String>()
         val allPaths = ArrayList<String>()
@@ -44,7 +83,8 @@ class MainActivity : AppCompatActivity() {
         val fileList: ArrayList<HashMap<String, String>> = ArrayList()
         return try {
             val rootFolder = File(rootPath)
-            val files = rootFolder.listFiles() //here you will get NPE if directory doesn't contains  any file,handle it like this.
+            val files =
+                rootFolder.listFiles() //here you will get NPE if directory doesn't contains  any file,handle it like this.
             for (file in files) {
                 if (file.isDirectory) {
                     if (getPlayList(file.absolutePath) != null) {
@@ -53,7 +93,8 @@ class MainActivity : AppCompatActivity() {
                         break
                     }
                 } else if (file.name.endsWith(".mp3") || file.name.endsWith(".amr") ||
-                    file.name.endsWith(".m4a")) {
+                    file.name.endsWith(".m4a")
+                ) {
                     val song: HashMap<String, String> = HashMap()
                     song["file_path"] = file.absolutePath
                     song["file_name"] = file.name
