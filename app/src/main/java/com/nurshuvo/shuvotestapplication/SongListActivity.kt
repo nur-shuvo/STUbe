@@ -33,6 +33,7 @@ class SongListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_song_list)
         supportActionBar?.hide()
+
         playButton = findViewById(R.id.startPauseButton)
         containerLayout = findViewById(R.id.constraintLayoutContainer)
         nextIcon = findViewById(R.id.next_icon)

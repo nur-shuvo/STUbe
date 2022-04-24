@@ -19,14 +19,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setContentView(R.layout.new_layout)
+        supportActionBar?.hide()
+
         if ((SDK_INT >= Build.VERSION_CODES.R) && !checkPermission()) {
             requestPermission()
         } else {
             doMainTask()
         }
-
-        supportActionBar?.hide()
-        setContentView(R.layout.new_layout)
     }
 
     private fun checkPermission(): Boolean {
@@ -93,8 +93,8 @@ class MainActivity : AppCompatActivity() {
                         break
                     }
                 } else if (file.name.endsWith(".mp3") || file.name.endsWith(".amr") ||
-                    file.name.endsWith(".m4a")
-                ) {
+                    file.name.endsWith(".m4a") || file.name.endsWith(".aac"))
+                 {
                     val song: HashMap<String, String> = HashMap()
                     song["file_path"] = file.absolutePath
                     song["file_name"] = file.name
