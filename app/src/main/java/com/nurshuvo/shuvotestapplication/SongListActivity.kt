@@ -242,6 +242,10 @@ class SongListActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        moveTaskToBack(true)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         notiManager?.cancelAll()
