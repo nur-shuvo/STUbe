@@ -21,6 +21,7 @@ import com.nurshuvo.shuvotestapplication.services.OnClearFromRecentService
 
 class SongListActivity : AppCompatActivity() {
 
+    //TODO Move necessary data to viewModel
     private lateinit var allPaths: ArrayList<String>
     private lateinit var playButton: ImageView
     private lateinit var containerLayout: ConstraintLayout
@@ -28,6 +29,7 @@ class SongListActivity : AppCompatActivity() {
     private lateinit var prevIcon: ImageView
     private var notiManager: NotificationManager? = null
     var allTracks = ArrayList<Track>()
+    var isBackPressed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -241,9 +243,16 @@ class SongListActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        isBackPressed = true
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        notiManager?.cancelAll()
-        unregisterReceiver(broadcastReceiver)
+        if (!isBackPressed) {
+            notiManager?.cancelAll()
+            unregisterReceiver(broadcastReceiver)
+        }
     }
 }
