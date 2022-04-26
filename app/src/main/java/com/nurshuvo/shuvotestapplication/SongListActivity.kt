@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.View
@@ -28,7 +29,7 @@ class SongListActivity : AppCompatActivity() {
     private lateinit var nextIcon: ImageView
     private lateinit var prevIcon: ImageView
     private var notiManager: NotificationManager? = null
-    var allTracks = ArrayList<Track>()
+    private var allTracks = ArrayList<Track>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +123,14 @@ class SongListActivity : AppCompatActivity() {
         mp.setOnCompletionListener {
             playNextSong()
         }
+
+        val mediaSessionCompat = (application as STubeApplication).mediaSessionCompat
+        val seekBarProgressCallBack = object: MediaSessionCompat.Callback() {
+            override fun onSeekTo(pos: Long) {
+                mp.seekTo(pos.toInt())
+            }
+        }
+        mediaSessionCompat?.setCallback(seekBarProgressCallBack)
     }
 
     private fun createChannel() {
@@ -139,14 +148,17 @@ class SongListActivity : AppCompatActivity() {
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            val action = p1?.extras?.get("actionname")
 
-            if (action == CreateNotification.ACTION_PREVIOUS) {
-                playPrevSong()
-            } else if (action == CreateNotification.ACTION_PLAY) {
-                playButtonAction()
-            } else {
-                playNextSong()
+            when (p1?.extras?.get("actionname")) {
+                CreateNotification.ACTION_PREVIOUS -> {
+                    playPrevSong()
+                }
+                CreateNotification.ACTION_PLAY -> {
+                    playButtonAction()
+                }
+                else -> {
+                    playNextSong()
+                }
             }
         }
     }
@@ -156,6 +168,16 @@ class SongListActivity : AppCompatActivity() {
         val mp = (application as STubeApplication).appContainer.mediaPlayer
         val nextPosition = (vm.songPosition + 1) % allPaths.size
         try {
+            CreateNotification().createNotification(
+                this,
+                vm.allTracks?.get(vm.songPosition)!!,
+                R.drawable.play_icon_playing,
+                vm.songPosition,
+                (allPaths.size - 1),
+                vm,
+                PlaybackStateCompat.STATE_STOPPED
+            )
+
             mp.reset()
 
             vm.songPosition = nextPosition
@@ -172,7 +194,7 @@ class SongListActivity : AppCompatActivity() {
                 vm.songPosition,
                 (allPaths.size - 1),
                 vm,
-                PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
+                PlaybackStateCompat.STATE_PLAYING
             )
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
@@ -184,6 +206,16 @@ class SongListActivity : AppCompatActivity() {
         val mp = (application as STubeApplication).appContainer.mediaPlayer
         val prevPosition = (vm.songPosition - 1 + allPaths.size) % allPaths.size
         try {
+            CreateNotification().createNotification(
+                this,
+                vm.allTracks?.get(vm.songPosition)!!,
+                R.drawable.play_icon_playing,
+                vm.songPosition,
+                (allPaths.size - 1),
+                vm,
+                PlaybackStateCompat.STATE_STOPPED
+            )
+
             mp.reset()
 
             vm.songPosition = prevPosition
@@ -201,7 +233,7 @@ class SongListActivity : AppCompatActivity() {
                 vm.songPosition,
                 (allPaths.size - 1),
                 vm,
-                PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS
+                PlaybackStateCompat.STATE_PLAYING
             )
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
