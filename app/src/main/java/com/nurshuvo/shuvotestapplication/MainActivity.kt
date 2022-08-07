@@ -7,7 +7,9 @@ import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -15,14 +17,14 @@ import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
-
+        val TAG = "MainActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.new_layout)
         supportActionBar?.hide()
 
-        if ((SDK_INT >= Build.VERSION_CODES.R) && !checkPermission()) {
+        if ((SDK_INT >= Build.VERSION_CODES.LOLLIPOP) && !checkPermission()) {
             requestPermission()
         } else {
             doMainTask()
@@ -36,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermission() {
-        if (SDK_INT >= Build.VERSION_CODES.R) {
+        if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ActivityCompat.requestPermissions(this, arrayOf(READ_EXTERNAL_STORAGE), 101)
         }
     }
@@ -64,18 +66,23 @@ class MainActivity : AppCompatActivity() {
                 val filePath = song["file_path"]
                 //here you will get list of file name and file path that present in your device
                 println("file details : name = $fileName path = $filePath")
+                Log.d(TAG, "doMainTask() -> " + filePath)
                 allPaths.add(filePath!!)
                 allSongs.add(fileName!!)
             }
         }
-
+        Log.d(TAG, "doMainTask() -> " + (songList == null))
         findViewById<View>(R.id.tv3).setOnClickListener {
-            val intent = Intent()
-            intent.putExtra("allSongs", allSongs)
-            intent.putExtra("allPaths", allPaths)
-            intent.action = "com.shuvo.songActivity"
-            finish()
-            startActivity(intent)
+            if (songList != null && songList.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "songs not found!", Toast.LENGTH_LONG).show()
+            } else {
+                val intent = Intent()
+                intent.putExtra("allSongs", allSongs)
+                intent.putExtra("allPaths", allPaths)
+                intent.action = "com.shuvo.songActivity"
+                finish()
+                startActivity(intent)
+            }
         }
     }
 
