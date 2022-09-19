@@ -74,7 +74,7 @@ class CreateNotification() {
                 activity,
                 0,
                 intentPrevious,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             drwPrevious = R.drawable.ic_prev
 
@@ -85,7 +85,7 @@ class CreateNotification() {
                 activity,
                 0,
                 intentPlay,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
             var pendingIntentNext: PendingIntent? = null
@@ -96,7 +96,7 @@ class CreateNotification() {
                 activity,
                 0,
                 intentNext,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             drwNext = R.drawable.ic_next
 
