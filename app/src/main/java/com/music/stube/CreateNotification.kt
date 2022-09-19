@@ -14,6 +14,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.music.stube.services.NotificationActionService
 import com.music.stube.viewmodel.SharedViewModel
+import java.io.ByteArrayInputStream
+
+/**
+ * TODOs
+ * 1. Track image data does not need to be extracted here, bitmap conversion is probably costly
+ *  move the responsibility  to the callers.
+ *  note that createNotification() calls are too frequent
+ *
+ *  2. Refactor the code (it is too messy)
+ */
 
 class CreateNotification() {
     companion object {
@@ -39,6 +49,10 @@ class CreateNotification() {
             mmr.setDataSource(track.filePath)
             val duration =
                 mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
+            var inputStream: ByteArrayInputStream? = null
+            if (mmr.embeddedPicture != null) {
+                inputStream = ByteArrayInputStream(mmr.embeddedPicture)
+            }
             mmr.release()
 
             // Needed to set for android 11.
@@ -64,9 +78,9 @@ class CreateNotification() {
                 .build()
             mediaSessionCompat?.setPlaybackState(mPlaybackState)
 
-            val bitmapIcon = BitmapFactory.decodeResource(activity.resources, track.image)
+            val bitmapIcon = BitmapFactory.decodeStream(inputStream)
 
-            var pendingIntentPrev: PendingIntent? = null
+            val pendingIntentPrev: PendingIntent?
             var drwPrevious = 0
             val intentPrevious = Intent(activity, NotificationActionService::class.java)
             intentPrevious.action = ACTION_PREVIOUS
@@ -78,7 +92,7 @@ class CreateNotification() {
             )
             drwPrevious = R.drawable.ic_prev
 
-            var pendingIntentPlay: PendingIntent? = null
+            val pendingIntentPlay: PendingIntent?
             val intentPlay = Intent(activity, NotificationActionService::class.java)
             intentPlay.action = ACTION_PLAY
             pendingIntentPlay = PendingIntent.getBroadcast(
@@ -88,7 +102,7 @@ class CreateNotification() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            var pendingIntentNext: PendingIntent? = null
+            val pendingIntentNext: PendingIntent?
             var drwNext = 0
             val intentNext = Intent(activity, NotificationActionService::class.java)
             intentNext.action = ACTION_NEXT
