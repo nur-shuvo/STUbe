@@ -1,9 +1,8 @@
-package com.nurshuvo.shuvotestapplication.viewmodel
+package com.music.stube.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.nurshuvo.shuvotestapplication.Track
+import com.music.stube.Track
 
 class SharedViewModel : ViewModel() {
     var paused = MutableLiveData<Int>(0)

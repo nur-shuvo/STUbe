@@ -1,4 +1,4 @@
-package com.nurshuvo.shuvotestapplication
+package com.music.stube
 
 import org.junit.Test
 

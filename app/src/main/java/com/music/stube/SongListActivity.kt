@@ -1,4 +1,4 @@
-package com.nurshuvo.shuvotestapplication
+package com.music.stube
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -18,7 +18,7 @@ import android.widget.ImageView
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.nurshuvo.shuvotestapplication.services.OnClearFromRecentService
+import com.music.stube.services.OnClearFromRecentService
 
 class SongListActivity : AppCompatActivity() {
 
