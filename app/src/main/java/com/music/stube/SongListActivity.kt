@@ -6,23 +6,28 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.FileProvider
 import com.music.stube.services.OnClearFromRecentService
+import java.io.File
 
 class SongListActivity : AppCompatActivity() {
 
     //TODO Move necessary data to viewModel
+    val TAG = "SongListActivity"
     private lateinit var allPaths: ArrayList<String>
     private lateinit var playButton: ImageView
     private lateinit var containerLayout: ConstraintLayout
@@ -79,10 +84,11 @@ class SongListActivity : AppCompatActivity() {
                 listView.setPadding(0, 0, 0, 300)
             }
         }
-
+        
         listView.onItemClickListener =
             OnItemClickListener { _, _, position, _ -> // Get the selected item text from ListView
                 try {
+                    Log.i(TAG, "onItemClick")
                     mp.reset()
 
                     vm.songPosition = position
@@ -107,6 +113,25 @@ class SongListActivity : AppCompatActivity() {
                     e.printStackTrace()
                 }
             }
+        listView.onItemLongClickListener= AdapterView.OnItemLongClickListener { _, _, position, _ ->
+            try{
+                Log.i(TAG,"onItemLongClickListener -> absolute path: "+allPaths[position]+" file name: "+allSongs[position])
+                val uri : Uri = FileProvider.getUriForFile(this,"com.music.stube",File(allPaths[position]))
+                Log.i(TAG, "content uri: "+uri)
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    type = "audio/*"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+            true
+        }
 
         playButton.setOnClickListener {
             playButtonAction()
