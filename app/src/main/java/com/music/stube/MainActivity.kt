@@ -13,6 +13,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -57,24 +60,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun doMainTask() {
-        val songList = getPlayList(Environment.getExternalStorageDirectory().path)
+        var songList : ArrayList<HashMap<String, String>>? = null
         val allSongs = ArrayList<String>()
         val allPaths = ArrayList<String>()
-        if (songList != null) {
-            for (song in songList) {
-                val fileName = song["file_name"]
-                val filePath = song["file_path"]
-                //here you will get list of file name and file path that present in your device
-                println("file details : name = $fileName path = $filePath")
-                Log.d(TAG, "doMainTask() -> " + filePath)
-                allPaths.add(filePath!!)
-                allSongs.add(fileName!!)
+        // Do it I/O thread!
+        lifecycleScope.launch(Dispatchers.IO) {
+            songList = getPlayList(Environment.getExternalStorageDirectory().path)
+            if (songList != null) {
+                for (song in songList!!) {
+                    val fileName = song["file_name"]
+                    val filePath = song["file_path"]
+                    //here you will get list of file name and file path that present in your device
+                    println("file details : name = $fileName path = $filePath")
+                    Log.d(TAG, "doMainTask() -> " + filePath)
+                    allPaths.add(filePath!!)
+                    allSongs.add(fileName!!)
+                }
             }
+            Log.d(TAG, "doMainTask() -> " + (songList == null))
         }
-        Log.d(TAG, "doMainTask() -> " + (songList == null))
         findViewById<View>(R.id.tv3).setOnClickListener {
-            if (songList != null && songList.isEmpty()) {
-                Toast.makeText(getApplicationContext(), "songs not found!", Toast.LENGTH_LONG).show()
+            if (songList == null || songList?.isEmpty() == true) {
+                Toast.makeText(getApplicationContext(), "Fetching songs, please wait a few moments!", Toast.LENGTH_LONG).show()
             } else {
                 val intent = Intent()
                 intent.putExtra("allSongs", allSongs)
